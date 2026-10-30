@@ -1,760 +1,460 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Techgrid Systems - Live Cyber Threat Map</title>
-  <style>
-    :root {
-      --bg-dark: #04070d;
-      --panel-bg: rgba(8, 13, 23, 0.92);
-      --panel-border: rgba(30, 41, 59, 0.8);
-      --primary-cyan: #06b6d4;
-      --accent-blue: #3b82f6;
-      --threat-red: #f43f5e;
-      --threat-orange: #fb923c;
-      --threat-yellow: #facc15;
-      --threat-purple: #c084fc;
-      --threat-green: #34d399;
-      --map-land: #111a2e;
-      --map-border: #1e293b;
-      --text-main: #f8fafc;
-      --text-muted: #64748b;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      user-select: none;
-    }
-
-    body {
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      overflow: hidden;
-      height: 100vh;
-      width: 100vw;
-    }
-
-    .app-container {
-      display: grid;
-      grid-template-columns: 280px 1fr 320px;
-      grid-template-rows: 50px 1fr 100px;
-      height: 100vh;
-      width: 100vw;
-      position: relative;
-    }
-
-    /* TOP HEADER */
-    header {
-      grid-column: 1 / span 3;
-      grid-row: 1;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 16px;
-      background: var(--panel-bg);
-      border-bottom: 1px solid var(--panel-border);
-      z-index: 20;
-    }
-
-    .brand-section {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .brand-logo {
-      height: 28px;
-      width: auto;
-    }
-
-    .brand-title {
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-main);
-    }
-
-    .brand-sub {
-      font-size: 10px;
-      color: var(--primary-cyan);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .header-cta {
-      display: flex;
-      gap: 8px;
-    }
-
-    .btn-cta {
-      background: rgba(6, 182, 212, 0.1);
-      border: 1px solid var(--primary-cyan);
-      color: var(--primary-cyan);
-      font-size: 10px;
-      font-weight: 700;
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      transition: all 0.2s ease;
-    }
-
-    .btn-cta:hover {
-      background: var(--primary-cyan);
-      color: #000;
-    }
-
-    .btn-cta-danger {
-      background: rgba(244, 63, 94, 0.1);
-      border-color: var(--threat-red);
-      color: var(--threat-red);
-    }
-
-    .btn-cta-danger:hover {
-      background: var(--threat-red);
-      color: #fff;
-    }
-
-    /* LEFT OVERLAY PANEL */
-    .left-panel {
-      grid-column: 1;
-      grid-row: 2;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      z-index: 10;
-      pointer-events: none;
-    }
-
-    .overlay-card {
-      background: var(--panel-bg);
-      border: 1px solid var(--panel-border);
-      border-radius: 6px;
-      padding: 12px;
-      backdrop-filter: blur(8px);
-      pointer-events: auto;
-    }
-
-    .card-title {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .filter-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .filter-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .filter-row input {
-      appearance: none;
-      width: 14px;
-      height: 14px;
-      border-radius: 3px;
-      border: 1px solid var(--text-muted);
-      outline: none;
-      cursor: pointer;
-      position: relative;
-    }
-
-    .filter-row input:checked {
-      background: var(--primary-cyan);
-      border-color: var(--primary-cyan);
-    }
-
-    .filter-row input:checked::after {
-      content: '✓';
-      position: absolute;
-      color: #000;
-      font-size: 10px;
-      font-weight: bold;
-      top: -2px;
-      left: 2px;
-    }
-
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
-
-    .alerts-ticker {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      font-size: 11px;
-      color: var(--text-muted);
-      max-height: 180px;
-      overflow: hidden;
-    }
-
-    .alert-item {
-      border-left: 2px solid var(--primary-cyan);
-      padding-left: 8px;
-      line-height: 1.3;
-    }
-
-    /* CENTER MAP CANVAS CONTAINER */
-    .map-wrapper {
-      grid-column: 1 / span 3;
-      grid-row: 1 / span 3;
-      position: relative;
-      background: #04070d;
-      overflow: hidden;
-    }
-
-    canvas#worldCanvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
-    /* RIGHT SIDEBAR PANEL */
-    .right-panel {
-      grid-column: 3;
-      grid-row: 2;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      z-index: 10;
-      overflow-y: auto;
-      pointer-events: auto;
-      background: var(--panel-bg);
-      border-left: 1px solid var(--panel-border);
-    }
-
-    .interval-select {
-      width: 100%;
-      background: #0d1527;
-      border: 1px solid var(--panel-border);
-      color: var(--primary-cyan);
-      font-size: 11px;
-      padding: 6px 8px;
-      border-radius: 4px;
-      outline: none;
-      cursor: pointer;
-    }
-
-    .stats-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 11px;
-    }
-
-    .stats-table th {
-      color: var(--text-muted);
-      text-align: left;
-      padding-bottom: 4px;
-      font-weight: 500;
-    }
-
-    .stats-table td {
-      padding: 4px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-    }
-
-    .pct-val {
-      text-align: right;
-      color: var(--primary-cyan);
-      font-weight: bold;
-    }
-
-    .bar-bg {
-      background: rgba(255, 255, 255, 0.05);
-      height: 3px;
-      border-radius: 2px;
-      overflow: hidden;
-      margin-top: 2px;
-    }
-
-    .bar-fill {
-      height: 100%;
-      background: var(--primary-cyan);
-    }
-
-    .port-matrix {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 4px;
-      margin-top: 4px;
-    }
-
-    .port-box {
-      background: #0c1322;
-      border: 1px solid var(--panel-border);
-      padding: 6px;
-      text-align: center;
-      border-radius: 4px;
-    }
-
-    .port-num {
-      font-size: 12px;
-      font-weight: bold;
-      color: var(--primary-cyan);
-    }
-
-    .port-label {
-      font-size: 9px;
-      color: var(--text-muted);
-    }
-
-    /* BOTTOM TIMELINE BAR */
-    .bottom-bar {
-      grid-column: 1 / span 3;
-      grid-row: 3;
-      background: var(--panel-bg);
-      border-top: 1px solid var(--panel-border);
-      z-index: 20;
-      display: flex;
-      flex-direction: column;
-      padding: 8px 16px;
-    }
-
-    .timeline-canvas-wrap {
-      width: 100%;
-      height: 50px;
-    }
-
-    canvas#timelineCanvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
-    .timeline-footer {
-      display: flex;
-      justify-content: space-between;
-      font-size: 10px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Techgrid Systems - Live 3D Threat Map</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+    <!-- Three.js for 3D Globe Rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #030712;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.6);
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #06b6d4;
+            border-radius: 2px;
+        }
+    </style>
 </head>
-<body>
+<body class="relative h-full w-full bg-slate-950 text-slate-100 overflow-hidden flex flex-col select-none">
 
-  <div class="app-container">
-    <!-- MAP WRAPPER (BACKGROUND) -->
-    <div class="map-wrapper">
-      <canvas id="worldCanvas"></canvas>
-    </div>
-
-    <!-- TOP HEADER -->
-    <header>
-      <div class="brand-section">
-        <img src="https://icons.techgrid-systems.org.uk/tgs-primary.png" alt="Techgrid Systems" class="brand-logo" onerror="this.style.display='none'">
-        <div>
-          <div class="brand-title">Live Threat Map</div>
-          <div class="brand-sub">Powered by Techgrid Intelligence</div>
+    <!-- TOP HEADER BAR -->
+    <header class="h-14 border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-md px-4 flex items-center justify-between z-20 shrink-0">
+        <div class="flex items-center space-x-3">
+            <img src="https://icons.techgrid-systems.org.uk/tgs-primary.png" alt="Techgrid Systems" class="h-7 w-auto" onerror="this.src='https://placehold.co/160x30/0f172a/06b6d4?text=TECHGRID'">
+            <div class="h-4 w-px bg-slate-700"></div>
+            <div>
+                <span class="font-orbitron font-bold text-xs tracking-wider text-white">TECHGRID <span class="text-cyan-400">THREAT INTELLIGENCE</span></span>
+                <span class="text-[9px] block text-slate-400 -mt-0.5">3D GLOBAL SOC MONITOR</span>
+            </div>
         </div>
-      </div>
 
-      <div class="header-cta">
-        <button class="btn-cta">Read H1 2026 Threat Report</button>
-        <button class="btn-cta btn-cta-danger">Under Attack</button>
-        <button class="btn-cta">Contact Sales</button>
-      </div>
+        <div class="flex items-center space-x-3">
+            <span class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs">
+                <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="font-bold text-[10px] tracking-wider">LIVE DATA FEED</span>
+            </span>
+            <button class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-orbitron font-bold text-xs px-3 py-1.5 rounded-lg transition-all shadow-lg shadow-cyan-500/20 uppercase tracking-wider">
+                Read Threat Report
+            </button>
+        </div>
     </header>
 
-    <!-- LEFT OVERLAY PANEL -->
-    <div class="left-panel">
-      <div class="overlay-card">
-        <div class="card-title">Attack Types</div>
-        <div class="filter-list">
-          <label class="filter-row">
-            <input type="checkbox" id="chk-web" checked>
-            <span class="dot" style="background: var(--threat-red);"></span>
-            Web Attackers
-          </label>
-          <label class="filter-row">
-            <input type="checkbox" id="chk-ddos" checked>
-            <span class="dot" style="background: var(--threat-orange);"></span>
-            DDoS Attackers
-          </label>
-          <label class="filter-row">
-            <input type="checkbox" id="chk-intruders" checked>
-            <span class="dot" style="background: var(--threat-yellow);"></span>
-            Intruders
-          </label>
-          <label class="filter-row">
-            <input type="checkbox" id="chk-scammers" checked>
-            <span class="dot" style="background: var(--threat-purple);"></span>
-            Scammers
-          </label>
-          <label class="filter-row">
-            <input type="checkbox" id="chk-anonymizers" checked>
-            <span class="dot" style="background: var(--threat-green);"></span>
-            Anonymizers
-          </label>
-        </div>
-      </div>
+    <!-- MAIN INTERACTIVE CONTAINER -->
+    <div class="relative flex-1 w-full h-full overflow-hidden grid grid-cols-12 pointer-events-none">
 
-      <div class="overlay-card">
-        <div class="card-title">Threat Alerts</div>
-        <div class="alerts-ticker" id="alerts-ticker">
-          <div class="alert-item">CRITICAL: Active HTTP/2 Rapid Reset Vector Detected</div>
-          <div class="alert-item">WARNING: High-Volume Mirai Botnet Probe Target: UK SOC</div>
-          <div class="alert-item">NOTICE: Global Anonymizer Relay Node Spike in EU Region</div>
+        <!-- 3D GLOBE CANVAS CONTAINER -->
+        <div id="globeContainer" class="absolute inset-0 z-0 pointer-events-auto cursor-grab active:cursor-grabbing"></div>
+
+        <!-- LEFT PANEL: ATTACK TYPE FILTERS & THREAT ALERTS -->
+        <aside class="col-span-3 z-10 p-4 flex flex-col space-y-4 pointer-events-auto h-full overflow-hidden">
+            <!-- Attack Filters -->
+            <div class="glass-panel rounded-2xl p-4 shadow-2xl space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <span class="font-orbitron text-xs font-bold text-cyan-400 tracking-wider">ATTACK FILTERS</span>
+                    <i class="fa-solid fa-filter text-xs text-slate-400"></i>
+                </div>
+                <div class="space-y-2 text-xs">
+                    <label class="flex items-center space-x-2.5 cursor-pointer hover:text-white transition-colors">
+                        <input type="checkbox" id="chk-web" checked class="accent-rose-500 w-3.5 h-3.5 rounded cursor-pointer">
+                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block shadow-sm shadow-rose-500/50"></span>
+                        <span class="font-mono text-slate-300">Web Attackers</span>
+                    </label>
+                    <label class="flex items-center space-x-2.5 cursor-pointer hover:text-white transition-colors">
+                        <input type="checkbox" id="chk-ddos" checked class="accent-orange-500 w-3.5 h-3.5 rounded cursor-pointer">
+                        <span class="w-2.5 h-2.5 rounded-full bg-orange-500 inline-block shadow-sm shadow-orange-500/50"></span>
+                        <span class="font-mono text-slate-300">DDoS Attackers</span>
+                    </label>
+                    <label class="flex items-center space-x-2.5 cursor-pointer hover:text-white transition-colors">
+                        <input type="checkbox" id="chk-intruders" checked class="accent-amber-400 w-3.5 h-3.5 rounded cursor-pointer">
+                        <span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block shadow-sm shadow-amber-400/50"></span>
+                        <span class="font-mono text-slate-300">Intruders</span>
+                    </label>
+                    <label class="flex items-center space-x-2.5 cursor-pointer hover:text-white transition-colors">
+                        <input type="checkbox" id="chk-scammers" checked class="accent-purple-500 w-3.5 h-3.5 rounded cursor-pointer">
+                        <span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block shadow-sm shadow-purple-500/50"></span>
+                        <span class="font-mono text-slate-300">Scammers</span>
+                    </label>
+                    <label class="flex items-center space-x-2.5 cursor-pointer hover:text-white transition-colors">
+                        <input type="checkbox" id="chk-anonymizers" checked class="accent-emerald-400 w-3.5 h-3.5 rounded cursor-pointer">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block shadow-sm shadow-emerald-400/50"></span>
+                        <span class="font-mono text-slate-300">Anonymizers</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Threat Bulletins -->
+            <div class="glass-panel rounded-2xl p-4 shadow-2xl flex-1 flex flex-col overflow-hidden space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <span class="font-orbitron text-xs font-bold text-rose-400 tracking-wider">THREAT ALERTS</span>
+                    <i class="fa-solid fa-triangle-exclamation text-xs text-rose-400"></i>
+                </div>
+                <div id="alertsContainer" class="flex-1 overflow-y-auto space-y-2 text-[11px] font-mono pr-1">
+                    <div class="p-2 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300">
+                        <div class="font-bold">CRITICAL VECTOR DETECTED</div>
+                        <div class="text-[10px] text-slate-400 mt-0.5">High volume SYN flood originating from EU ASNs towards UK SOC Nodes.</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CENTER AREA (GLOBE CONTROLS OVERLAY) -->
+        <div class="col-span-6 z-10 flex flex-col justify-between p-4 pointer-events-none">
+            <div class="flex justify-center">
+                <div class="glass-panel px-4 py-1.5 rounded-full text-xs font-mono text-slate-300 flex items-center space-x-2">
+                    <i class="fa-solid fa-earth-americas text-cyan-400 animate-spin"></i>
+                    <span>AUTO-TURNING TO ACTIVE TARGET LOCATIONS</span>
+                </div>
+            </div>
+
+            <!-- BOTTOM STREAMING LOG -->
+            <div class="glass-panel rounded-2xl p-3 shadow-2xl pointer-events-auto h-28 flex flex-col">
+                <div class="flex items-center justify-between pb-1.5 border-b border-slate-800 text-[10px] font-orbitron text-cyan-400 font-bold">
+                    <span>LIVE INCOMING TELEMETRY STREAM</span>
+                    <span id="eventCount" class="text-slate-400">EVENTS: 0</span>
+                </div>
+                <div id="liveStreamLog" class="flex-1 overflow-y-auto font-mono text-[11px] space-y-1 mt-1"></div>
+            </div>
         </div>
-      </div>
+
+        <!-- RIGHT PANEL: DYNAMIC STATISTICS TABLES -->
+        <aside class="col-span-3 z-10 p-4 flex flex-col space-y-4 pointer-events-auto h-full overflow-hidden">
+            <div class="glass-panel rounded-2xl p-4 shadow-2xl flex-1 flex flex-col overflow-y-auto space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <span class="font-orbitron text-xs font-bold text-cyan-400 tracking-wider">LIVE METRICS</span>
+                    <select id="intervalSelect" class="bg-slate-900 border border-slate-700 text-slate-300 text-[10px] rounded px-1.5 py-0.5 font-mono outline-none">
+                        <option value="1h">1 Hour</option>
+                        <option value="24h" selected>24 Hours</option>
+                        <option value="1w">1 Week</option>
+                    </select>
+                </div>
+
+                <!-- Top Attackers Table -->
+                <div class="space-y-1.5">
+                    <div class="text-[10px] font-orbitron font-bold text-slate-400 uppercase">Top Attacker Countries</div>
+                    <table class="w-full text-left text-xs font-mono">
+                        <tbody id="tbl-attackers"></tbody>
+                    </table>
+                </div>
+
+                <!-- Top Attacked Table -->
+                <div class="space-y-1.5">
+                    <div class="text-[10px] font-orbitron font-bold text-slate-400 uppercase">Top Target Countries</div>
+                    <table class="w-full text-left text-xs font-mono">
+                        <tbody id="tbl-attacked"></tbody>
+                    </table>
+                </div>
+
+                <!-- Top Network Vectors -->
+                <div class="space-y-1.5">
+                    <div class="text-[10px] font-orbitron font-bold text-slate-400 uppercase">Top Network Vectors</div>
+                    <table class="w-full text-left text-xs font-mono">
+                        <tbody id="tbl-vectors"></tbody>
+                    </table>
+                </div>
+            </div>
+        </aside>
     </div>
 
-    <!-- RIGHT SIDEBAR PANEL -->
-    <div class="right-panel">
-      <div class="card-title">
-        <span>Statistics Interval</span>
-      </div>
-      <select class="interval-select" id="interval-select">
-        <option value="1h">1 Hour</option>
-        <option value="24h" selected>24 Hours</option>
-        <option value="1w">1 Week</option>
-        <option value="1m">1 Month</option>
-      </select>
+    <!-- THREE.JS GLOBE & THREAT LOGIC -->
+    <script>
+        // Target City Coordinates
+        const cities = [
+            { name: "United States", lat: 37.0902, lng: -95.7129 },
+            { name: "United Kingdom", lat: 55.3781, lng: -3.4360 },
+            { name: "Germany", lat: 51.1657, lng: 10.4515 },
+            { name: "Japan", lat: 36.2048, lng: 138.2529 },
+            { name: "Singapore", lat: 1.3521, lng: 103.8198 },
+            { name: "China", lat: 35.8617, lng: 104.1954 },
+            { name: "Brazil", lat: -14.2350, lng: -51.9253 },
+            { name: "Australia", lat: -25.2744, lng: 133.7751 },
+            { name: "South Africa", lat: -30.5595, lng: 22.9375 },
+            { name: "India", lat: 20.5937, lng: 78.9629 }
+        ];
 
-      <div>
-        <div class="card-title" style="margin-top: 8px;">Top Attackers</div>
-        <table class="stats-table">
-          <tbody id="tbl-attackers"></tbody>
-        </table>
-      </div>
+        const attackTypes = {
+            web: { label: "Web Attacker", color: 0xf43f5e, hex: "#f43f5e", checkId: "chk-web" },
+            ddos: { label: "DDoS Attacker", color: 0xfb923c, hex: "#fb923c", checkId: "chk-ddos" },
+            intruders: { label: "Intruder", color: 0xfacc15, hex: "#facc15", checkId: "chk-intruders" },
+            scammers: { label: "Scammer", color: 0xc084fc, hex: "#c084fc", checkId: "chk-scammers" },
+            anonymizers: { label: "Anonymizer", color: 0x34d399, hex: "#34d399", checkId: "chk-anonymizers" }
+        };
 
-      <div>
-        <div class="card-title" style="margin-top: 8px;">Top Attacked</div>
-        <table class="stats-table">
-          <tbody id="tbl-attacked"></tbody>
-        </table>
-      </div>
+        // Aggregated stats
+        let totalEventsCount = 0;
+        const stats = {
+            attackers: {},
+            targets: {},
+            vectors: {}
+        };
 
-      <div>
-        <div class="card-title" style="margin-top: 8px;">Top Network Attack Vectors</div>
-        <table class="stats-table">
-          <tbody id="tbl-vectors"></tbody>
-        </table>
-      </div>
+        // Three.js Setup
+        const container = document.getElementById('globeContainer');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.z = 220;
 
-      <div>
-        <div class="card-title" style="margin-top: 8px;">Top Application Violations</div>
-        <table class="stats-table">
-          <tbody id="tbl-violations"></tbody>
-        </table>
-      </div>
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        container.appendChild(renderer.domElement);
 
-      <div>
-        <div class="card-title" style="margin-top: 8px;">Top Scanned UDP Ports</div>
-        <div class="port-matrix">
-          <div class="port-box"><div class="port-num">5060</div><div class="port-label">SIP</div></div>
-          <div class="port-box"><div class="port-num">8443</div><div class="port-label">HTTPS</div></div>
-          <div class="port-box"><div class="port-num">1719</div><div class="port-label">H.323</div></div>
-          <div class="port-box"><div class="port-num">123</div><div class="port-label">NTP</div></div>
-          <div class="port-box"><div class="port-num">161</div><div class="port-label">SNMP</div></div>
-          <div class="port-box"><div class="port-num">500</div><div class="port-label">IKE</div></div>
-        </div>
-      </div>
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+        scene.add(ambientLight);
 
-      <div>
-        <div class="card-title" style="margin-top: 8px;">Top Scanned TCP Ports</div>
-        <div class="port-matrix">
-          <div class="port-box"><div class="port-num">5900</div><div class="port-label">VNC</div></div>
-          <div class="port-box"><div class="port-num">443</div><div class="port-label">HTTPS</div></div>
-          <div class="port-box"><div class="port-num">80</div><div class="port-label">HTTP</div></div>
-          <div class="port-box"><div class="port-num">3389</div><div class="port-label">RDP</div></div>
-          <div class="port-box"><div class="port-num">23</div><div class="port-label">TELNET</div></div>
-          <div class="port-box"><div class="port-num">22</div><div class="port-label">SSH</div></div>
-        </div>
-      </div>
-    </div>
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(5, 3, 5);
+        scene.add(dirLight);
 
-    <!-- BOTTOM TIMELINE BAR -->
-    <div class="bottom-bar">
-      <div class="timeline-canvas-wrap">
-        <canvas id="timelineCanvas"></canvas>
-      </div>
-      <div class="timeline-footer">
-        <span>14:00</span>
-        <span>14:15</span>
-        <span>14:30</span>
-        <span>14:45</span>
-        <span>LIVE TELEMETRY STREAM</span>
-      </div>
-    </div>
-  </div>
+        // Earth Globe Creation
+        const globeRadius = 60;
+        const globeGroup = new THREE.Group();
+        scene.add(globeGroup);
 
-  <script>
-    // World Map Canvas Setup
-    const mapCanvas = document.getElementById('worldCanvas');
-    const ctx = mapCanvas.getContext('2d');
+        // Realistic Photorealistic Earth Texture Map Canvas
+        const textureLoader = new THREE.TextureLoader();
+        // NASA Blue Marble Earth Texture URL
+        const earthTexture = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg');
 
-    const timelineCanvas = document.getElementById('timelineCanvas');
-    const tCtx = timelineCanvas.getContext('2d');
-
-    let activeArcs = [];
-    let impactPulses = [];
-    let countryFlashes = [];
-
-    const attackTypes = {
-      web: { label: "Web Attacker", color: "#f43f5e", checkId: "chk-web" },
-      ddos: { label: "DDoS Attacker", color: "#fb923c", checkId: "chk-ddos" },
-      intruders: { label: "Intruder", color: "#facc15", checkId: "chk-intruders" },
-      scammers: { label: "Scammer", color: "#c084fc", checkId: "chk-scammers" },
-      anonymizers: { label: "Anonymizer", color: "#34d399", checkId: "chk-anonymizers" }
-    };
-
-    // Major Global Cities & Coordinates
-    const cities = [
-      { name: "United States", lat: 37.0902, lng: -95.7129 },
-      { name: "United Kingdom", lat: 55.3781, lng: -3.4360 },
-      { name: "Germany", lat: 51.1657, lng: 10.4515 },
-      { name: "Japan", lat: 36.2048, lng: 138.2529 },
-      { name: "Singapore", lat: 1.3521, lng: 103.8198 },
-      { name: "China", lat: 35.8617, lng: 104.1954 },
-      { name: "Brazil", lat: -14.2350, lng: -51.9253 },
-      { name: "Australia", lat: -25.2744, lng: 133.7751 },
-      { name: "Nigeria", lat: 9.0820, lng: 8.6753 },
-      { name: "India", lat: 20.5937, lng: 78.9629 }
-    ];
-
-    function resize() {
-      mapCanvas.width = mapCanvas.parentElement.clientWidth;
-      mapCanvas.height = mapCanvas.parentElement.clientHeight;
-      timelineCanvas.width = timelineCanvas.parentElement.clientWidth;
-      timelineCanvas.height = timelineCanvas.parentElement.clientHeight;
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    function geoToCanvas(lat, lng) {
-      const x = ((lng + 180) / 360) * mapCanvas.width;
-      const y = ((90 - lat) / 180) * mapCanvas.height;
-      return { x, y };
-    }
-
-    // High-Resolution 2D World Map Simplified Vector Paths
-    const worldPaths = [
-      // North America
-      [[ -168, 65 ], [ -140, 70 ], [ -100, 75 ], [ -60, 60 ], [ -60, 45 ], [ -80, 25 ], [ -105, 20 ], [ -120, 35 ], [ -168, 65 ]],
-      // South America
-      [[ -80, 10 ], [ -35, -5 ], [ -40, -35 ], [ -70, -55 ], [ -80, -15 ], [ -80, 10 ]],
-      // Europe
-      [[ -10, 35 ], [ 30, 40 ], [ 40, 65 ], [ 10, 70 ], [ -10, 50 ], [ -10, 35 ]],
-      // Africa
-      [[ -17, 35 ], [ 51, 12 ], [ 40, -35 ], [ 10, -35 ], [ -17, 15 ], [ -17, 35 ]],
-      // Asia
-      [[ 40, 65 ], [ 180, 70 ], [ 150, 20 ], [ 100, 10 ], [ 60, 25 ], [ 40, 40 ], [ 40, 65 ]],
-      // Australia
-      [[ 113, -11 ], [ 153, -11 ], [ 153, -38 ], [ 113, -38 ], [ 113, -11 ]]
-    ];
-
-    function drawWorldMap() {
-      ctx.fillStyle = "#111a2e";
-      ctx.strokeStyle = "#1e293b";
-      ctx.lineWidth = 1;
-
-      worldPaths.forEach(path => {
-        ctx.beginPath();
-        path.forEach((pt, i) => {
-          const pos = geoToCanvas(pt[1], pt[0]);
-          if (i === 0) ctx.moveTo(pos.x, pos.y);
-          else ctx.lineTo(pos.x, pos.y);
+        const globeGeo = new THREE.SphereGeometry(globeRadius, 64, 64);
+        const globeMat = new THREE.MeshPhongMaterial({
+            map: earthTexture,
+            shininess: 15
         });
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-      });
+        const globeMesh = new THREE.Mesh(globeGeo, globeMat);
+        globeGroup.add(globeMesh);
 
-      // Grid Overlay
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.02)";
-      for (let x = 0; x < mapCanvas.width; x += 50) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, mapCanvas.height); ctx.stroke();
-      }
-      for (let y = 0; y < mapCanvas.height; y += 50) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(mapCanvas.width, y); ctx.stroke();
-      }
-    }
+        // Atmosphere Glow Effect
+        const atmosGeo = new THREE.SphereGeometry(globeRadius * 1.03, 64, 64);
+        const atmosMat = new THREE.MeshBasicMaterial({
+            color: 0x06b6d4,
+            transparent: true,
+            opacity: 0.12,
+            side: THREE.BackSide
+        });
+        const atmosMesh = new THREE.Mesh(atmosGeo, atmosMat);
+        scene.add(atmosMesh);
 
-    function processThreat(src, dst, typeKey) {
-      const type = attackTypes[typeKey];
-      const isChecked = document.getElementById(type.checkId).checked;
-      if (!isChecked) return;
-
-      activeArcs.push({
-        src, dst, color: type.color, progress: 0, speed: 0.008 + Math.random() * 0.01
-      });
-    }
-
-    function renderMap() {
-      ctx.clearRect(0, 0, mapCanvas.width, mapCanvas.height);
-      drawWorldMap();
-
-      // Country Flash Effects
-      countryFlashes.forEach((flash, idx) => {
-        flash.alpha -= 0.02;
-        if (flash.alpha <= 0) {
-          countryFlashes.splice(idx, 1);
-          return;
-        }
-        const pos = geoToCanvas(flash.lat, flash.lng);
-        ctx.fillStyle = `rgba(244, 63, 94, ${flash.alpha})`;
-        ctx.beginPath();
-        ctx.arc(pos.x, pos.y, 25, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      // Impact Shockwave Pulses
-      impactPulses.forEach((pulse, idx) => {
-        pulse.radius += 1.5;
-        pulse.alpha -= 0.025;
-        if (pulse.alpha <= 0) {
-          impactPulses.splice(idx, 1);
-          return;
-        }
-        const pos = geoToCanvas(pulse.lat, pulse.lng);
-        ctx.strokeStyle = `rgba(6, 182, 212, ${pulse.alpha})`;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(pos.x, pos.y, pulse.radius, 0, Math.PI * 2);
-        ctx.stroke();
-      });
-
-      // Trajectory Arcs
-      activeArcs.forEach((arc, idx) => {
-        arc.progress += arc.speed;
-        if (arc.progress >= 1) {
-          impactPulses.push({ lat: arc.dst.lat, lng: arc.dst.lng, radius: 2, alpha: 1 });
-          countryFlashes.push({ lat: arc.dst.lat, lng: arc.dst.lng, alpha: 0.6 });
-          activeArcs.splice(idx, 1);
-          return;
+        // Convert Lat/Lng to 3D Sphere Points
+        function latLngToVector3(lat, lng, radius) {
+            const phi = (90 - lat) * (Math.PI / 180);
+            const theta = (lng + 180) * (Math.PI / 180);
+            const x = -(radius * Math.sin(phi) * Math.cos(theta));
+            const z = (radius * Math.sin(phi) * Math.sin(theta));
+            const y = (radius * Math.cos(phi));
+            return new THREE.Vector3(x, y, z);
         }
 
-        const start = geoToCanvas(arc.src.lat, arc.src.lng);
-        const end = geoToCanvas(arc.dst.lat, arc.dst.lng);
+        // Active Arc Animations
+        const activeArcObjects = [];
 
-        const midX = (start.x + end.x) / 2;
-        const midY = (start.y + end.y) / 2 - 50;
+        function create3DArc(src, dst, typeKey) {
+            const type = attackTypes[typeKey];
+            const startVec = latLngToVector3(src.lat, src.lng, globeRadius);
+            const endVec = latLngToVector3(dst.lat, dst.lng, globeRadius);
 
-        // Glowing Line
-        ctx.strokeStyle = arc.color;
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(start.x, start.y);
-        ctx.quadraticCurveTo(midX, midY, end.x, end.y);
-        ctx.stroke();
+            // Compute curved control point
+            const midVec = new THREE.Vector3().addVectors(startVec, endVec).multiplyScalar(0.5);
+            const distance = startVec.distanceTo(endVec);
+            midVec.setLength(globeRadius + distance * 0.35);
 
-        // Ballistic Particle
-        const t = arc.progress;
-        const px = (1 - t) * (1 - t) * start.x + 2 * (1 - t) * t * midX + t * t * end.x;
-        const py = (1 - t) * (1 - t) * start.y + 2 * (1 - t) * t * midY + t * t * end.y;
+            const curve = new THREE.QuadraticBezierCurve3(startVec, midVec, endVec);
+            const points = curve.getPoints(50);
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
 
-        ctx.fillStyle = "#ffffff";
-        ctx.beginPath();
-        ctx.arc(px, py, 3, 0, Math.PI * 2);
-        ctx.fill();
-      });
+            const material = new THREE.LineBasicMaterial({
+                color: type.color,
+                transparent: true,
+                opacity: 0.85,
+                linewidth: 2
+            });
 
-      requestAnimationFrame(renderMap);
-    }
+            const line = new THREE.Line(geometry, material);
+            globeGroup.add(line);
 
-    // Timeline Graph Rendering
-    function drawTimeline() {
-      tCtx.clearRect(0, 0, timelineCanvas.width, timelineCanvas.height);
-      tCtx.strokeStyle = "#06b6d4";
-      tCtx.lineWidth = 1.5;
-      tCtx.beginPath();
+            // Glowing pulse particle along arc
+            const particleGeo = new THREE.SphereGeometry(0.8, 8, 8);
+            const particleMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const particle = new THREE.Mesh(particleGeo, particleMat);
+            globeGroup.add(particle);
 
-      const points = 100;
-      const step = timelineCanvas.width / points;
+            activeArcObjects.push({
+                line, particle, curve, progress: 0, speed: 0.012 + Math.random() * 0.008,
+                targetDst: dst
+            });
+        }
 
-      for (let i = 0; i <= points; i++) {
-        const x = i * step;
-        const y = timelineCanvas.height - (Math.sin(i * 0.2 + Date.now() * 0.003) * 15 + 25);
-        if (i === 0) tCtx.moveTo(x, y);
-        else tCtx.lineTo(x, y);
-      }
-      tCtx.stroke();
-    }
+        // Target Camera Smooth Rotation
+        let targetRotationY = 0;
+        function rotateGlobeToTarget(lng) {
+            targetRotationY = -(lng * (Math.PI / 180)) - Math.PI / 2;
+        }
 
-    // Stats Table Populator
-    function renderStats() {
-      const fillTable = (id, items) => {
-        const tbody = document.getElementById(id);
-        tbody.innerHTML = items.map(item => `
-          <tr>
-            <td>
-              ${item.name}
-              <div class="bar-bg"><div class="bar-fill" style="width: ${item.pct}%"></div></div>
-            </td>
-            <td class="pct-val">${item.pct}%</td>
-          </tr>
-        `).join('');
-      };
+        // Mouse Drag Interaction for Manual Rotation
+        let isMouseDown = false;
+        let mouseX = 0, mouseY = 0;
 
-      fillTable('tbl-attackers', [
-        { name: "United States", pct: 28 },
-        { name: "China", pct: 24 },
-        { name: "Russia", pct: 19 },
-        { name: "Singapore", pct: 14 }
-      ]);
+        container.addEventListener('mousedown', (e) => {
+            isMouseDown = true;
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
 
-      fillTable('tbl-attacked', [
-        { name: "United Kingdom", pct: 32 },
-        { name: "United States", pct: 26 },
-        { name: "Japan", pct: 18 },
-        { name: "Germany", pct: 14 }
-      ]);
+        window.addEventListener('mouseup', () => isMouseDown = false);
 
-      fillTable('tbl-vectors', [
-        { name: "UDP Flood", pct: 42 },
-        { name: "SYN Flood", pct: 28 },
-        { name: "NTP Amplification", pct: 18 },
-        { name: "DNS Amplification", pct: 12 }
-      ]);
+        container.addEventListener('mousemove', (e) => {
+            if (isMouseDown) {
+                const deltaX = e.clientX - mouseX;
+                const deltaY = e.clientY - mouseY;
+                globeGroup.rotation.y += deltaX * 0.005;
+                globeGroup.rotation.x += deltaY * 0.005;
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            }
+        });
 
-      fillTable('tbl-violations', [
-        { name: "SQL Injection", pct: 36 },
-        { name: "HTTP Flood", pct: 30 },
-        { name: "Cross-Site Scripting", pct: 20 },
-        { name: "Remote Code Execution", pct: 14 }
-      ]);
-    }
+        // Window Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
 
-    // Live Telemetry Loop
-    setInterval(() => {
-      const src = cities[Math.floor(Math.random() * cities.length)];
-      let dst = cities[Math.floor(Math.random() * cities.length)];
-      while (dst === src) dst = cities[Math.floor(Math.random() * cities.length)];
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
 
-      const keys = Object.keys(attackTypes);
-      const typeKey = keys[Math.floor(Math.random() * keys.length)];
+            // Auto-spinning globe when not dragging
+            if (!isMouseDown) {
+                globeGroup.rotation.y += 0.002;
+            }
 
-      processThreat(src, dst, typeKey);
-    }, 600);
+            // Animate arcs
+            for (let i = activeArcObjects.length - 1; i >= 0; i--) {
+                const arcObj = activeArcObjects[i];
+                arcObj.progress += arcObj.speed;
 
-    setInterval(drawTimeline, 50);
+                if (arcObj.progress >= 1) {
+                    // Remove arc & particle from scene on impact
+                    globeGroup.remove(arcObj.line);
+                    globeGroup.remove(arcObj.particle);
+                    arcObj.line.geometry.dispose();
+                    arcObj.line.material.dispose();
+                    arcObj.particle.geometry.dispose();
+                    arcObj.particle.material.dispose();
+                    activeArcObjects.splice(i, 1);
+                } else {
+                    const point = arcObj.curve.getPoint(arcObj.progress);
+                    arcObj.particle.position.copy(point);
+                }
+            }
 
-    // Initializations
-    renderMap();
-    renderStats();
-  </script>
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Live Feed Ingestion Pipeline
+        function triggerThreatEvent() {
+            const keys = Object.keys(attackTypes).filter(k => document.getElementById(attackTypes[k].checkId).checked);
+            if (keys.length === 0) return;
+
+            const typeKey = keys[Math.floor(Math.random() * keys.length)];
+            const src = cities[Math.floor(Math.random() * cities.length)];
+            let dst = cities[Math.floor(Math.random() * cities.length)];
+            while (dst === src) dst = cities[Math.floor(Math.random() * cities.length)];
+
+            create3DArc(src, dst, typeKey);
+
+            // Turn globe towards impact target
+            rotateGlobeToTarget(dst.lng);
+
+            // Update Telemetry Metrics
+            totalEventsCount++;
+            document.getElementById('eventCount').innerText = `EVENTS: ${totalEventsCount}`;
+
+            stats.attackers[src.name] = (stats.attackers[src.name] || 0) + 1;
+            stats.targets[dst.name] = (stats.targets[dst.name] || 0) + 1;
+            
+            const vectorsList = ["UDP Flood", "SYN Flood", "HTTP Flood", "SQL Injection", "XSS Attack"];
+            const vec = vectorsList[Math.floor(Math.random() * vectorsList.length)];
+            stats.vectors[vec] = (stats.vectors[vec] || 0) + 1;
+
+            updateTables();
+            appendLog(src, dst, typeKey);
+        }
+
+        function appendLog(src, dst, typeKey) {
+            const type = attackTypes[typeKey];
+            const logContainer = document.getElementById('liveStreamLog');
+            const item = document.createElement('div');
+            const time = new Date().toLocaleTimeString();
+            const ip = `${Math.floor(Math.random()*180+10)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;
+
+            item.className = "flex items-center justify-between border-b border-slate-800/50 py-0.5";
+            item.innerHTML = `
+                <span class="text-slate-400">[${time}] ${ip} (${src.name})</span>
+                <span class="font-bold uppercase px-1.5 rounded text-[9px]" style="color:${type.hex}; background:${type.hex}15">${type.label}</span>
+                <span class="text-slate-300">Target: ${dst.name}</span>
+            `;
+
+            logContainer.prepend(item);
+            if (logContainer.children.length > 20) logContainer.removeChild(logContainer.lastChild);
+        }
+
+        function updateTables() {
+            const renderTable = (tbodyId, dataMap) => {
+                const tbody = document.getElementById(tbodyId);
+                const sorted = Object.entries(dataMap).sort((a,b) => b[1] - a[1]).slice(0, 4);
+                tbody.innerHTML = sorted.map(([name, count]) => {
+                    const pct = ((count / totalEventsCount) * 100).toFixed(1);
+                    return `
+                        <tr>
+                            <td class="py-1 text-slate-300">
+                                <div>${name}</div>
+                                <div class="w-full bg-slate-800 h-1 rounded overflow-hidden mt-0.5">
+                                    <div class="bg-cyan-500 h-full" style="width: ${pct}%"></div>
+                                </div>
+                            </td>
+                            <td class="text-right text-cyan-400 font-bold pl-2">${pct}%</td>
+                        </tr>
+                    `;
+                }).join('');
+            };
+
+            renderTable('tbl-attackers', stats.attackers);
+            renderTable('tbl-attacked', stats.targets);
+            renderTable('tbl-vectors', stats.vectors);
+        }
+
+        // Spawn events on interval
+        setInterval(triggerThreatEvent, 900);
+    </script>
 </body>
 </html>
