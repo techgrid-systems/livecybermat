@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full w-full overflow-hidden">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radware Live Threat Map</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #030712;
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+</head>
+<body class="relative h-full w-full bg-slate-950 text-slate-100 flex flex-col">
+
+    <!-- FLOATING TOP NAVIGATION OVERLAY -->
+    <header class="absolute top-3 left-3 right-3 z-30 flex items-center justify-between pointer-events-none">
+        <!-- Brand / Title Tag -->
+        <div class="pointer-events-auto bg-slate-900/90 border border-slate-800/80 backdrop-blur-md px-3.5 py-2 rounded-xl flex items-center space-x-3 shadow-2xl">
+            <div class="relative flex items-center justify-center w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/40 text-cyan-400 font-orbitron font-bold">
+                <i class="fa-solid fa-shield-halved text-sm"></i>
+                <span class="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
+                </span>
+            </div>
+            <div>
+                <div class="flex items-center space-x-2">
+                    <span class="font-orbitron font-bold text-xs tracking-wider text-white">RADWARE <span class="text-cyan-400">THREAT MAP</span></span>
+                    <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 uppercase">LIVE EMBED</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls (Fullscreen Toggle & Direct Link) -->
+        <div class="pointer-events-auto flex items-center space-x-2">
+            <a href="https://livethreatmap.radware.com/" target="_blank" rel="noopener noreferrer" title="Open directly in new tab" class="bg-slate-900/90 hover:bg-slate-800 border border-slate-800/80 text-slate-300 hover:text-cyan-400 px-3 py-2 rounded-xl text-xs flex items-center space-x-2 transition-all shadow-xl backdrop-blur-md">
+                <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                <span class="hidden sm:inline font-mono text-[11px]">OPEN RADWARE</span>
+            </a>
+            <button id="fullscreenBtn" title="Toggle Fullscreen" class="bg-slate-900/90 hover:bg-slate-800 border border-slate-800/80 text-slate-300 hover:text-cyan-400 p-2.5 rounded-xl transition-all shadow-xl backdrop-blur-md">
+                <i class="fa-solid fa-expand text-xs w-4 h-4 flex items-center justify-center" id="fullscreenIcon"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- FULLSCREEN IFRAME EMBED -->
+    <main class="relative flex-1 w-full h-full overflow-hidden">
+        <iframe 
+            id="threatMapIframe"
+            src="https://livethreatmap.radware.com/" 
+            title="Radware Live Threat Map"
+            class="w-full h-full border-0 outline-none"
+            allow="fullscreen; autoplay; accelerometer; gyroscope"
+            sandbox="allow-scripts allow-same-origin allow-popups allow-forms">
+        </iframe>
+
+        <!-- X-FRAME-OPTIONS / CSP RESTRICTION FALLBACK NOTICE -->
+        <div id="iframeFallbackNotice" class="hidden absolute inset-0 z-20 bg-slate-950/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center">
+            <div class="max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-4">
+                <div class="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto text-xl">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div class="space-y-1">
+                    <h2 class="font-orbitron font-bold text-white text-base">IFRAME EMBED RESTRICTED</h2>
+                    <p class="text-xs text-slate-400 leading-relaxed font-sans">
+                        The live site at <code class="text-cyan-400 font-mono">livethreatmap.radware.com</code> may restrict cross-origin framing via <code class="text-slate-300 font-mono">X-Frame-Options</code> or Content Security Policies in certain browser environments.
+                    </p>
+                </div>
+                <div class="pt-2 flex flex-col space-y-2">
+                    <a href="https://livethreatmap.radware.com/" target="_blank" rel="noopener noreferrer" class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-orbitron font-bold text-xs py-2.5 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center space-x-2">
+                        <span>LAUNCH DIRECLTY IN NEW TAB</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Fullscreen Toggle Handler
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const fullscreenIcon = document.getElementById('fullscreenIcon');
+
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => console.error(err));
+                fullscreenIcon.className = "fa-solid fa-compress text-xs w-4 h-4 flex items-center justify-center";
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                    fullscreenIcon.className = "fa-solid fa-expand text-xs w-4 h-4 flex items-center justify-center";
+                }
+            }
+        });
+
+        // Fallback detection if iframe is blocked by X-Frame-Options or CSP headers
+        const iframe = document.getElementById('threatMapIframe');
+        const fallbackNotice = document.getElementById('iframeFallbackNotice');
+
+        let iframeLoaded = false;
+        iframe.onload = function() {
+            iframeLoaded = true;
+            try {
+                // Access check: If blocked by cross-origin security headers, accessing contentWindow location throws error
+                const testAccess = iframe.contentWindow.location.href;
+            } catch(e) {
+                // Standard cross-origin restriction is normal for external sites.
+            }
+        };
+
+        // Fallback timer check
+        setTimeout(() => {
+            if (!iframeLoaded) {
+                // If the iframe failed to load or was refused by browser security policies
+                fallbackNotice.classList.remove('hidden');
+            }
+        }, 6000);
+    </script>
+</body>
+</html>
