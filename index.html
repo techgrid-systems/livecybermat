@@ -72,7 +72,7 @@
         <!-- 3D GLOBE CANVAS CONTAINER -->
         <div id="globeContainer" class="absolute inset-0 z-0 pointer-events-auto cursor-grab active:cursor-grabbing"></div>
 
-        <!-- LEFT PANEL: ATTACK TYPE FILTERS & THREAT ALERTS -->
+        <!-- LEFT PANEL: ATTACK TYPE FILTERS & TECHGRID PLATFORMS MENU -->
         <aside class="col-span-3 z-10 p-4 flex flex-col space-y-4 pointer-events-auto h-full overflow-hidden">
             <!-- Attack Filters -->
             <div class="glass-panel rounded-2xl p-4 shadow-2xl space-y-3">
@@ -225,65 +225,6 @@
             { name: "India", lat: 20.5937, lng: 78.9629 }
         ];
 
-        // Real Live Cybersecurity Outbreak Advisories (FortiGuard / CISA / CVSS 4.0 Active Feed)
-        const realOutbreaks = [
-            {
-                date: "OCT 27, 2026",
-                severity: "CRITICAL",
-                title: "Node2Shell Remote Code Execution",
-                type: "Vulnerability",
-                desc: "CVE-2026-111497: Out-of-bounds write vulnerability in Google Brotli decoder component used in Node.js web communications. Allows unauthenticated RCE."
-            },
-            {
-                date: "OCT 22, 2026",
-                severity: "CRITICAL",
-                title: "PHP2Shell Remote Code Execution Vulnerabilities",
-                type: "Vulnerability",
-                desc: "CVE-2028-109618 (CVSS 4.0): Request-processing and memory-management flaw in PHP script execution engine allowing unauthorized remote server control."
-            },
-            {
-                date: "OCT 16, 2026",
-                severity: "HIGH",
-                title: "Atlassian Arbitrary File Access Vulnerability",
-                type: "Vulnerability",
-                desc: "CVE-2028-21589: Critical path restriction flaw affecting Atlassian Data Center & Server products, enabling unauthenticated file access."
-            },
-            {
-                date: "SEP 23, 2026",
-                severity: "HIGH",
-                title: "GitLab Path Traversal Vulnerability",
-                type: "Vulnerability",
-                desc: "CVE-2028-85706: Active exploitation targeting path traversal in GitLab CE/EE repository commits leading to unauthorized system file read."
-            },
-            {
-                date: "LIVE FEED",
-                severity: "CRITICAL",
-                title: "Zero-Day Ivanti Connect Secure Authentication Bypass",
-                type: "Active Campaign",
-                desc: "Active telemetry indicates mass scanning and exploit deployment against CVE-2026-4652 gateway endpoints across North America and EU."
-            }
-        ];
-
-        function loadRealAlerts() {
-            const alertsContainer = document.getElementById('alertsContainer');
-            alertsContainer.innerHTML = '';
-            realOutbreaks.forEach(alert => {
-                const div = document.createElement('div');
-                const isCrit = alert.severity === "CRITICAL";
-                div.className = `p-2.5 rounded-lg border ${isCrit ? 'bg-rose-500/10 border-rose-500/30 text-rose-300' : 'bg-amber-500/10 border-amber-500/30 text-amber-300'}`;
-                div.innerHTML = `
-                    <div class="flex items-center justify-between text-[9px] font-mono opacity-80 mb-1">
-                        <span>${alert.date}</span>
-                        <span class="px-1.5 py-0.5 rounded font-bold ${isCrit ? 'bg-rose-500/20 text-rose-400' : 'bg-amber-500/20 text-amber-400'}">${alert.severity}</span>
-                    </div>
-                    <div class="font-bold text-xs text-white">${alert.title}</div>
-                    <div class="text-[10px] text-slate-300 mt-1 leading-relaxed">${alert.desc}</div>
-                `;
-                alertsContainer.appendChild(div);
-            });
-        }
-        loadRealAlerts();
-
         const attackTypes = {
             web: { label: "Web Attacker", color: 0xf43f5e, hex: "#f43f5e", checkId: "chk-web" },
             ddos: { label: "DDoS Attacker", color: 0xfb923c, hex: "#fb923c", checkId: "chk-ddos" },
@@ -326,7 +267,6 @@
 
         // Realistic Photorealistic Earth Texture Map Canvas
         const textureLoader = new THREE.TextureLoader();
-        // NASA Blue Marble Earth Texture URL
         const earthTexture = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg');
 
         const globeGeo = new THREE.SphereGeometry(globeRadius, 64, 64);
@@ -397,12 +337,6 @@
             });
         }
 
-        // Target Camera Smooth Rotation
-        let targetRotationY = 0;
-        function rotateGlobeToTarget(lng) {
-            targetRotationY = -(lng * (Math.PI / 180)) - Math.PI / 2;
-        }
-
         // Mouse Drag Interaction for Manual Rotation
         let isMouseDown = false;
         let mouseX = 0, mouseY = 0;
@@ -465,99 +399,6 @@
         }
         animate();
 
-        // FortiGuard Labs Real Outbreak Alerts Dataset
-        const fortiguardOutbreaks = [
-            {
-                date: "OCT 27, 2026",
-                severity: "CRITICAL",
-                title: "Node2Shell Remote Code Execution",
-                cve: "CVE-2026-111497",
-                desc: "Out-of-bounds write vulnerability in Google Brotli decoder within Node.js zlib module. RCE via crafted Brotli-compressed input.",
-                vector: "web"
-            },
-            {
-                date: "OCT 22, 2026",
-                severity: "CRITICAL",
-                title: "PHP2Shell Remote Code Execution Vulnerabilities",
-                cve: "CVE-2028-109618",
-                desc: "RCE via out-of-memory corruption in PHP request-processing and memory-management behavior. CVSS 9.2.",
-                vector: "web"
-            },
-            {
-                date: "OCT 16, 2026",
-                severity: "HIGH",
-                title: "Atlassian Arbitrary File Access Vulnerability",
-                cve: "CVE-2026-21589",
-                desc: "Critical arbitrary file access vulnerability affecting Atlassian Data Center and Server products. Unauthenticated remote attacker read access.",
-                vector: "intruders"
-            },
-            {
-                date: "SEP 23, 2026",
-                severity: "HIGH",
-                title: "GitLab Path Traversal Vulnerability",
-                cve: "CVE-2028-85706",
-                desc: "Observed active attack activity targeting path traversal in GitLab Community and Enterprise Edition allowing arbitrary file reading.",
-                vector: "intruders"
-            }
-        ];
-
-        // Populate FortiGuard Live Outbreak Alerts into Sidebar
-        function loadFortiguardAlerts() {
-            const alertsContainer = document.getElementById('alertsContainer');
-            alertsContainer.innerHTML = '';
-
-            fortiguardOutbreaks.forEach((outbreak) => {
-                const isCrit = outbreak.severity === "CRITICAL";
-                const card = document.createElement('div');
-                card.className = `p-2.5 rounded-lg border transition-all hover:bg-slate-900/80 cursor-pointer ${
-                    isCrit ? 'bg-rose-500/10 border-rose-500/30 text-rose-300' : 'bg-orange-500/10 border-orange-500/30 text-orange-300'
-                }`;
-                card.innerHTML = `
-                    <div class="flex items-center justify-between text-[9px] text-slate-400">
-                        <span>${outbreak.date}</span>
-                        <span class="font-bold px-1.5 py-0.2 rounded ${isCrit ? 'bg-rose-500/20 text-rose-400' : 'bg-orange-500/20 text-orange-400'}">${outbreak.severity}</span>
-                    </div>
-                    <div class="font-bold font-orbitron text-xs mt-1 text-white">${outbreak.title}</div>
-                    <div class="text-[10px] text-cyan-400 font-mono mt-0.5">${outbreak.cve}</div>
-                    <div class="text-[10px] text-slate-300 mt-1 leading-relaxed">${outbreak.desc}</div>
-                `;
-
-                // Clicking outbreak triggers live attack simulation on globe
-                card.addEventListener('click', () => {
-                    const src = cities[Math.floor(Math.random() * cities.length)];
-                    let dst = cities[Math.floor(Math.random() * cities.length)];
-                    while (dst === src) dst = cities[Math.floor(Math.random() * cities.length)];
-                    
-                    create3DArc(src, dst, outbreak.vector);
-                    rotateGlobeToTarget(dst.lng);
-                    appendLogFromOutbreak(outbreak, src, dst);
-                });
-
-                alertsContainer.appendChild(card);
-            });
-        }
-
-        function appendLogFromOutbreak(outbreak, src, dst) {
-            totalEventsCount++;
-            document.getElementById('eventCount').innerText = `EVENTS: ${totalEventsCount}`;
-            
-            const logContainer = document.getElementById('liveStreamLog');
-            const item = document.createElement('div');
-            const time = new Date().toLocaleTimeString();
-
-            item.className = "flex items-center justify-between border-b border-slate-800/50 py-0.5";
-            item.innerHTML = `
-                <span class="text-rose-400 font-bold">[${time}] ${outbreak.cve} EXPL</span>
-                <span class="uppercase px-1.5 rounded text-[9px] bg-rose-500/20 text-rose-300">${src.name}</span>
-                <span class="text-slate-300">Target: ${dst.name}</span>
-            `;
-
-            logContainer.prepend(item);
-            if (logContainer.children.length > 20) logContainer.removeChild(logContainer.lastChild);
-        }
-
-        loadFortiguardAlerts();
-
         // Live Feed Ingestion Pipeline
         function triggerThreatEvent() {
             const keys = Object.keys(attackTypes).filter(k => document.getElementById(attackTypes[k].checkId).checked);
@@ -569,7 +410,6 @@
             while (dst === src) dst = cities[Math.floor(Math.random() * cities.length)];
 
             create3DArc(src, dst, typeKey);
-            rotateGlobeToTarget(dst.lng);
 
             totalEventsCount++;
             document.getElementById('eventCount').innerText = `EVENTS: ${totalEventsCount}`;
@@ -630,34 +470,6 @@
 
         // Spawn events on interval
         setInterval(triggerThreatEvent, 900);
-
-        // Fetch Live FortiGuard Outbreak Alerts
-        async function fetchFortiGuardOutbreaks() {
-            const container = document.getElementById('alertsContainer');
-            
-            // Curated live enterprise outbreaks + dynamic feed fallback
-            const liveOutbreaks = [
-                { title: "Ivanti Connect Secure RCE Vulnerability (CVE-2023-46805)", severity: "CRITICAL", desc: "Active exploitation observed in the wild targeting gateway VPN appliances." },
-                { title: "Palo Alto Networks PAN-OS Command Injection (CVE-2024-3400)", severity: "CRITICAL", desc: "Global telemetry indicates automated exploit probes against firewall gateways." },
-                { title: "Apache ActiveMQ RCE Exploit Campaign", severity: "HIGH", desc: "Malware payload delivery via vulnerable OpenWire protocol endpoints." },
-                { title: "Cisco IOS XE Web UI Privilege Escalation", severity: "CRITICAL", desc: "Unauthorized account creation attempts detected across enterprise edge routers." },
-                { title: "ScreenConnect Authentication Bypass Vulnerability", severity: "HIGH", desc: "Ransomware deployment vectors observed leveraging unpatched instances." },
-                { title: "FortiDeceptor Deception Deployed & Active", severity: "NOTICE", desc: "Automated honeynet traps triggered across regional sensor nodes." }
-            ];
-
-            container.innerHTML = liveOutbreaks.map(alert => `
-                <div class="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 space-y-1">
-                    <div class="flex items-center justify-between">
-                        <span class="font-bold text-[10px] uppercase text-rose-400">[${alert.severity}]</span>
-                        <span class="text-[9px] text-slate-400">FortiGuard Labs</span>
-                    </div>
-                    <div class="font-bold text-slate-200">${alert.title}</div>
-                    <div class="text-[10px] text-slate-400">${alert.desc}</div>
-                </div>
-            `).join('');
-        }
-
-        fetchFortiGuardOutbreaks();
     </script>
 </body>
 </html>
